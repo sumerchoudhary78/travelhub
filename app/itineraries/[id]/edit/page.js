@@ -7,6 +7,7 @@ import { useAuth } from '../../../lib/AuthContext';
 import { doc, getDoc, updateDoc, collection, addDoc, deleteDoc, query, orderBy, getDocs, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import { FaRoute, FaCalendarAlt, FaGlobeAmericas, FaLock, FaSave, FaArrowLeft, FaSpinner, FaPlus, FaTrash, FaMapMarkerAlt } from 'react-icons/fa';
+import { trackLocationAdded, trackPublicItinerary } from '../../../utils/badgeUtils';
 
 export default function EditItinerary() { // Remove 'params' from the function signature
   const { id } = useParams(); // Use the useParams hook to get the 'id'
@@ -134,6 +135,11 @@ export default function EditItinerary() { // Remove 'params' from the function s
     try {
       // Update itinerary document
       const itineraryRef = doc(db, 'itineraries', id);
+      // Get current itinerary data to check if isPublic status changed
+      const itineraryDoc = await getDoc(itineraryRef);
+      const wasPublic = itineraryDoc.exists() ? itineraryDoc.data().isPublic || false : false;
+      const isNowPublic = isPublic;
+
       await updateDoc(itineraryRef, {
         title,
         description,
@@ -142,6 +148,11 @@ export default function EditItinerary() { // Remove 'params' from the function s
         isPublic,
         updatedAt: serverTimestamp()
       });
+
+      // If itinerary is now public but wasn't before, track it for badges
+      if (isNowPublic && !wasPublic) {
+        await trackPublicItinerary(currentUser.uid);
+      }
 
       // Redirect to the itinerary detail page
       router.push(`/itineraries/${id}`);
@@ -186,6 +197,9 @@ export default function EditItinerary() { // Remove 'params' from the function s
       };
 
       await addDoc(collection(db, 'itineraries', id, 'locations'), locationData);
+
+      // Track location added for badges
+      await trackLocationAdded(currentUser.uid);
 
       // Reset form and refresh locations
       setNewLocationName('');

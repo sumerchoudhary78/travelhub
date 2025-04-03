@@ -10,9 +10,12 @@ import { useAuth } from '../lib/AuthContext';
 import { doc, getDoc } from 'firebase/firestore'; // Removed updateDoc, handled by AuthContext
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../lib/firebase';
-import { FaUser, FaMapMarkerAlt, FaEdit, FaCheck, FaTimes, FaSpinner, FaUserFriends } from 'react-icons/fa';
+import { FaUser, FaMapMarkerAlt, FaEdit, FaCheck, FaTimes, FaSpinner, FaUserFriends, FaMedal } from 'react-icons/fa';
 import { useUserLocation } from '../utils/locationUtils';
 import { getUserFriends } from '../utils/friendUtils';
+import { updateProfileCompletion, getUserStats } from '../utils/badgeUtils';
+import BadgeDisplay from '../components/BadgeDisplay';
+import AchievementPopup from '../components/AchievementPopup';
 
 export default function Profile() {
   const { currentUser, updateUserProfile } = useAuth();
@@ -24,6 +27,8 @@ export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const [friends, setFriends] = useState([]);
   const [loadingFriends, setLoadingFriends] = useState(false);
+  const [userStats, setUserStats] = useState(null);
+  const [loadingStats, setLoadingStats] = useState(false);
 
   // Editable fields state
   const [displayName, setDisplayName] = useState('');
@@ -52,7 +57,7 @@ export default function Profile() {
           return;
       }
 
-      // Also fetch friends data
+      // Fetch friends data
       setLoadingFriends(true);
       try {
         const friendsData = await getUserFriends(currentUser.uid);
@@ -61,6 +66,17 @@ export default function Profile() {
         console.error('Error fetching friends:', error);
       } finally {
         setLoadingFriends(false);
+      }
+
+      // Fetch user stats
+      setLoadingStats(true);
+      try {
+        const stats = await getUserStats(currentUser.uid);
+        setUserStats(stats);
+      } catch (error) {
+        console.error('Error fetching user stats:', error);
+      } finally {
+        setLoadingStats(false);
       }
 
       setLoading(true); // Start loading profile data
@@ -158,6 +174,12 @@ export default function Profile() {
       // Keep imagePreview as the new URL (already set if uploaded, or remains the same if not)
       setImagePreview(updatedPhotoURL || '');
 
+      // Check if profile is complete and update badge progress
+      await updateProfileCompletion(currentUser.uid, {
+        ...userData,
+        ...updateData
+      });
+
 
       setIsEditing(false); // Exit editing mode
       // console.log("Profile updated successfully.");
@@ -203,6 +225,9 @@ export default function Profile() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
+      {/* Achievement Popup */}
+      <AchievementPopup />
+
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
           <span className="block sm:inline">{error}</span>
@@ -446,14 +471,28 @@ export default function Profile() {
               <div className="text-xs text-gray-500 dark:text-gray-400">Following</div>
             </div>
             <div>
-              <div className="text-xl font-bold text-indigo-600 dark:text-indigo-400">0</div>
+              <div className="text-xl font-bold text-indigo-600 dark:text-indigo-400">{userStats?.itinerariesCreated || 0}</div>
               <div className="text-xs text-gray-500 dark:text-gray-400">Itineraries</div>
             </div>
             <div>
-              <div className="text-xl font-bold text-indigo-600 dark:text-indigo-400">0</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Visited</div>
+              <div className="text-xl font-bold text-indigo-600 dark:text-indigo-400">{userStats?.messagesSent || 0}</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">Messages</div>
             </div>
           </div>
+        </div>
+
+        {/* Badges Section */}
+        <div className="border-t border-gray-200 dark:border-gray-700 px-6 py-4">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center">
+              <FaMedal className="mr-2 text-indigo-500" />
+              Badges & Achievements
+            </h2>
+            <Link href="/badges" className="text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300">
+              View All
+            </Link>
+          </div>
+          <BadgeDisplay userId={currentUser?.uid} limit={6} showTitle={false} />
         </div>
       </div>
     </div>

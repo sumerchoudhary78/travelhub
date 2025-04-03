@@ -7,6 +7,7 @@ import { useAuth } from '../../lib/AuthContext';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { FaRoute, FaCalendarAlt, FaGlobeAmericas, FaLock, FaSave, FaArrowLeft, FaSpinner } from 'react-icons/fa';
+import { trackItineraryCreated, trackPublicItinerary } from '../../utils/badgeUtils';
 
 export default function CreateItinerary() {
   const { currentUser } = useAuth();
@@ -21,25 +22,25 @@ export default function CreateItinerary() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!title) {
       setError('Please enter a title for your itinerary');
       return;
     }
-    
+
     if (!startDate || !endDate) {
       setError('Please specify start and end dates');
       return;
     }
-    
+
     if (new Date(startDate) > new Date(endDate)) {
       setError('End date cannot be before start date');
       return;
     }
-    
+
     setLoading(true);
     setError('');
-    
+
     try {
       // Create new itinerary document
       const itineraryData = {
@@ -53,9 +54,17 @@ export default function CreateItinerary() {
         updatedAt: serverTimestamp(),
         coverImage: null // No cover image initially
       };
-      
+
       const docRef = await addDoc(collection(db, 'itineraries'), itineraryData);
-      
+
+      // Track itinerary creation for badges
+      await trackItineraryCreated(currentUser.uid);
+
+      // If public, track that too
+      if (isPublic) {
+        await trackPublicItinerary(currentUser.uid);
+      }
+
       // Redirect to the edit page to add locations
       router.push(`/itineraries/${docRef.id}/edit`);
     } catch (error) {
@@ -91,13 +100,13 @@ export default function CreateItinerary() {
           <FaRoute className="mr-2 text-indigo-600" />
           Create New Itinerary
         </h1>
-        
+
         {error && (
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
             <p className="text-red-700 dark:text-red-400">{error}</p>
           </div>
         )}
-        
+
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Title */}
           <div>
@@ -114,7 +123,7 @@ export default function CreateItinerary() {
               required
             />
           </div>
-          
+
           {/* Description */}
           <div>
             <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -129,7 +138,7 @@ export default function CreateItinerary() {
               placeholder="Describe your trip plans..."
             />
           </div>
-          
+
           {/* Date Range */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -150,7 +159,7 @@ export default function CreateItinerary() {
                 />
               </div>
             </div>
-            
+
             <div>
               <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 End Date*
@@ -170,7 +179,7 @@ export default function CreateItinerary() {
               </div>
             </div>
           </div>
-          
+
           {/* Visibility */}
           <div>
             <div className="flex items-center">
@@ -199,7 +208,7 @@ export default function CreateItinerary() {
               )}
             </p>
           </div>
-          
+
           {/* Submit Button */}
           <div className="flex justify-end">
             <button

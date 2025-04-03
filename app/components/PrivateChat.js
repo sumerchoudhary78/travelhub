@@ -4,7 +4,10 @@ import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { collection, query, orderBy, limit, onSnapshot, addDoc, serverTimestamp, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { FaUser, FaPaperPlane, FaCircle } from 'react-icons/fa';
+import { FaUser, FaPaperPlane, FaCircle, FaRobot } from 'react-icons/fa';
+import TravelAssistant from './TravelAssistant';
+import { extractTravelQuery } from '../utils/geminiAI';
+import { trackMessageSent, trackUniqueChat, trackChatInitiated, trackTravelerQuery } from '../utils/badgeUtils';
 
 export default function PrivateChat({ currentUser, selectedUser, chatId }) {
   const [messages, setMessages] = useState([]);
@@ -12,6 +15,7 @@ export default function PrivateChat({ currentUser, selectedUser, chatId }) {
   const [loading, setLoading] = useState(true);
   const [chatPartner, setChatPartner] = useState(null);
   const messagesEndRef = useRef(null);
+  const [travelQueries, setTravelQueries] = useState({});
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -106,6 +110,24 @@ export default function PrivateChat({ currentUser, selectedUser, chatId }) {
     return () => unsubscribe();
   }, [chatId, currentUser]);
 
+  // Check for travel queries in messages
+  useEffect(() => {
+    const newTravelQueries = {};
+    let hasNewQueries = false;
+
+    messages.forEach(message => {
+      const query = extractTravelQuery(message.text);
+      if (query && !travelQueries[message.id]) {
+        newTravelQueries[message.id] = query;
+        hasNewQueries = true;
+      }
+    });
+
+    if (hasNewQueries) {
+      setTravelQueries(prev => ({ ...prev, ...newTravelQueries }));
+    }
+  }, [messages, travelQueries]);
+
   // Send a new message
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -114,8 +136,9 @@ export default function PrivateChat({ currentUser, selectedUser, chatId }) {
 
     try {
       // Add message to the subcollection
+      const messageText = newMessage.trim();
       await addDoc(collection(db, 'chats', chatId, 'messages'), {
-        text: newMessage.trim(),
+        text: messageText,
         senderId: currentUser.uid,
         senderName: currentUser.displayName || 'Anonymous',
         senderPhotoURL: currentUser.photoURL || null,
@@ -124,10 +147,19 @@ export default function PrivateChat({ currentUser, selectedUser, chatId }) {
 
       // Update the chat document
       await updateDoc(doc(db, 'chats', chatId), {
-        lastMessage: newMessage.trim(),
+        lastMessage: messageText,
         lastMessageTime: serverTimestamp(),
         [`unreadCount.${chatPartner.id}`]: (messages.filter(m => m.senderId !== chatPartner.id).length + 1)
       });
+
+      // Track message for badges
+      await trackMessageSent(currentUser.uid);
+      await trackUniqueChat(currentUser.uid, chatPartner.id);
+
+      // Check if message contains @traveler query
+      if (messageText.includes('@traveler')) {
+        await trackTravelerQuery(currentUser.uid);
+      }
 
       setNewMessage('');
     } catch (error) {
@@ -244,6 +276,11 @@ export default function PrivateChat({ currentUser, selectedUser, chatId }) {
                       }`}
                     >
                       <p className="text-sm">{message.text}</p>
+                      {travelQueries[message.id] && (
+                        <div className="mt-2">
+                          <TravelAssistant query={travelQueries[message.id]} />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -265,9 +302,17 @@ export default function PrivateChat({ currentUser, selectedUser, chatId }) {
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Type a message..."
+            placeholder="Type a message... (Use @traveler to get travel info)"
             className="flex-1 rounded-l-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-indigo-500 focus:border-indigo-500"
           />
+          {newMessage.includes('@traveler') && (
+            <div className="absolute bottom-14 left-0 right-0 bg-blue-50 dark:bg-blue-900/20 p-2 rounded-t-lg border border-blue-200 dark:border-blue-800 mx-4">
+              <div className="flex items-center text-xs text-blue-700 dark:text-blue-300">
+                <FaRobot className="mr-1" />
+                <span>Travel Assistant will respond when you send this message</span>
+              </div>
+            </div>
+          )}
           <button
             type="submit"
             disabled={!newMessage.trim()}

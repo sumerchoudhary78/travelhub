@@ -1,39 +1,86 @@
-import Image from "next/image";
+'use client';
+
 import Link from "next/link";
-import { FaMapMarkedAlt, FaUsers, FaComments, FaCompass } from "react-icons/fa";
+import { FaMapMarkedAlt, FaUsers, FaComments, FaCompass, FaGlobeAmericas, FaRoute, FaUserFriends } from "react-icons/fa";
+import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
+import AnimatedElement from "./components/AnimatedElement";
+
+// Dynamically import the Globe component
+const DynamicGlobe = dynamic(() => import("./components/DynamicGlobe"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full flex items-center justify-center bg-indigo-100/30 rounded-lg">
+      <FaGlobeAmericas className="text-indigo-500/50 text-5xl animate-pulse" />
+    </div>
+  )
+});
+
+
+
+// Feature card component with animation
+function FeatureCard({ icon, title, description, delay }) {
+  return (
+    <AnimatedElement animation="slideUp" delay={delay} className="h-full">
+      <motion.div
+        className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow-sm card-hover h-full glass"
+        whileHover={{ y: -5 }}
+      >
+        <motion.div
+          className="text-indigo-600 dark:text-indigo-400 mb-4"
+          whileHover={{ rotate: 5, scale: 1.1 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
+          {icon}
+        </motion.div>
+        <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">{title}</h3>
+        <p className="text-gray-600 dark:text-gray-300">{description}</p>
+      </motion.div>
+    </AnimatedElement>
+  );
+}
 
 export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+      <section className="relative bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden opacity-20">
+          <div className="absolute top-10 left-10 w-20 h-20 rounded-full bg-white animate-float" style={{ animationDelay: '0s' }}></div>
+          <div className="absolute top-40 right-20 w-32 h-32 rounded-full bg-white animate-float" style={{ animationDelay: '0.5s' }}></div>
+          <div className="absolute bottom-20 left-1/4 w-16 h-16 rounded-full bg-white animate-float" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute top-1/3 right-1/3 w-24 h-24 rounded-full bg-white animate-float" style={{ animationDelay: '1.5s' }}></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto relative z-10">
           <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div className="space-y-6">
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-                Connect with Travelers Worldwide
-              </h1>
-              <p className="text-xl">
-                Share experiences, discover new places, and meet fellow travelers on your journey.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Link href="/auth/signup" className="bg-white text-indigo-600 hover:bg-gray-100 px-6 py-3 rounded-md font-medium text-lg transition-colors">
-                  Join Now
-                </Link>
-                <Link href="/explore" className="bg-transparent border-2 border-white hover:bg-white/10 px-6 py-3 rounded-md font-medium text-lg transition-colors">
-                  Explore
-                </Link>
+            <AnimatedElement animation="slideRight">
+              <div className="space-y-6">
+                <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+                  Connect with Travelers Worldwide
+                </h1>
+                <p className="text-xl">
+                  Share experiences, discover new places, and meet fellow travelers on your journey.
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Link href="/auth/signup" className="bg-white text-indigo-600 hover:bg-gray-100 px-6 py-3 rounded-md font-medium text-lg transition-colors btn-hover-effect inline-block">
+                      Join Now
+                    </Link>
+                  </motion.div>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Link href="/explore" className="bg-transparent border-2 border-white hover:bg-white/10 px-6 py-3 rounded-md font-medium text-lg transition-colors btn-hover-effect inline-block">
+                      Explore
+                    </Link>
+                  </motion.div>
+                </div>
               </div>
-            </div>
-            <div className="hidden md:block">
-              <Image
-                src="/world-map.svg"
-                alt="World Map"
-                width={600}
-                height={400}
-                className="object-contain"
-              />
-            </div>
+            </AnimatedElement>
+
+            <AnimatedElement animation="fadeIn" className="hidden md:block h-[400px]">
+              <DynamicGlobe />
+            </AnimatedElement>
           </div>
         </div>
         <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white dark:from-gray-900 to-transparent"></div>
@@ -42,113 +89,157 @@ export default function Home() {
       {/* Features Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">
-            Discover the TravlrHub Experience
-          </h2>
+          <AnimatedElement>
+            <h2 className="text-3xl font-bold text-center mb-12 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent dark:text-white inline-block">
+              Discover the TravlrHub Experience
+            </h2>
+          </AnimatedElement>
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* Feature 1 */}
-            <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-              <div className="text-indigo-600 dark:text-indigo-400 mb-4">
-                <FaMapMarkedAlt className="h-10 w-10" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Location Sharing</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Share your location with other travelers and see who's nearby for meetups and adventures.
-              </p>
-            </div>
+            <FeatureCard
+              icon={<FaMapMarkedAlt className="h-10 w-10" />}
+              title="Location Sharing"
+              description="Share your location with other travelers and see who's nearby for meetups and adventures."
+              delay={0.1}
+            />
 
-            {/* Feature 2 */}
-            <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-              <div className="text-indigo-600 dark:text-indigo-400 mb-4">
-                <FaCompass className="h-10 w-10" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Explore Places</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Discover popular tourist spots, hidden gems, and get real-time information about each location.
-              </p>
-            </div>
+            <FeatureCard
+              icon={<FaCompass className="h-10 w-10" />}
+              title="Explore Places"
+              description="Discover popular tourist spots, hidden gems, and get real-time information about each location."
+              delay={0.2}
+            />
 
-            {/* Feature 3 */}
-            <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-              <div className="text-indigo-600 dark:text-indigo-400 mb-4">
-                <FaComments className="h-10 w-10" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Global & Private Chat</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Connect with the global traveler community or chat privately with new friends you meet along the way.
-              </p>
-            </div>
+            <FeatureCard
+              icon={<FaComments className="h-10 w-10" />}
+              title="Global & Private Chat"
+              description="Connect with the global traveler community or chat privately with new friends you meet along the way."
+              delay={0.3}
+            />
 
-            {/* Feature 4 */}
-            <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-              <div className="text-indigo-600 dark:text-indigo-400 mb-4">
-                <FaUsers className="h-10 w-10" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Tourist Count</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                See how many travelers are at specific locations in real-time to find popular spots or avoid crowds.
-              </p>
-            </div>
+            <FeatureCard
+              icon={<FaUsers className="h-10 w-10" />}
+              title="Tourist Count"
+              description="See how many travelers are at specific locations in real-time to find popular spots or avoid crowds."
+              delay={0.4}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Additional Features Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-800">
+        <div className="max-w-7xl mx-auto">
+          <AnimatedElement>
+            <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">
+              More Amazing Features
+            </h2>
+          </AnimatedElement>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <FeatureCard
+              icon={<FaRoute className="h-10 w-10" />}
+              title="Travel Itineraries"
+              description="Create and share detailed travel plans with timelines and locations. Get inspired by other travelers' itineraries."
+              delay={0.1}
+            />
+
+            <FeatureCard
+              icon={<FaUserFriends className="h-10 w-10" />}
+              title="Friend System"
+              description="Add and follow other travelers to stay updated on their activities and adventures around the world."
+              delay={0.2}
+            />
+
+            <FeatureCard
+              icon={<FaGlobeAmericas className="h-10 w-10" />}
+              title="AI Travel Assistant"
+              description="Get instant travel information and recommendations by typing '@traveler' in the chat using our Gemini AI integration."
+              delay={0.3}
+            />
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-indigo-50 dark:bg-gray-800">
-        <div className="max-w-5xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-indigo-600 to-purple-600 text-white relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden opacity-20">
+          <div className="absolute top-10 right-10 w-20 h-20 rounded-full bg-white animate-float" style={{ animationDelay: '0.2s' }}></div>
+          <div className="absolute bottom-20 left-20 w-32 h-32 rounded-full bg-white animate-float" style={{ animationDelay: '0.7s' }}></div>
+          <div className="absolute top-1/3 left-1/4 w-16 h-16 rounded-full bg-white animate-float" style={{ animationDelay: '1.2s' }}></div>
+        </div>
+
+        <AnimatedElement className="max-w-5xl mx-auto text-center relative z-10">
+          <h2 className="text-3xl font-bold mb-6">
             Ready to Start Your Journey?
           </h2>
-          <p className="text-xl mb-8 text-gray-600 dark:text-gray-300">
+          <p className="text-xl mb-8">
             Join thousands of travelers already connecting and sharing experiences on TravlrHub.
           </p>
-          <Link href="/auth/signup" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-md font-medium text-lg transition-colors inline-block">
-            Create Your Account
-          </Link>
-        </div>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="inline-block"
+          >
+            <Link href="/auth/signup" className="bg-white text-indigo-600 hover:bg-gray-100 px-8 py-4 rounded-md font-medium text-lg transition-colors btn-hover-effect inline-block animate-glow">
+              Create Your Account
+            </Link>
+          </motion.div>
+        </AnimatedElement>
       </section>
 
       {/* Footer */}
       <footer className="bg-gray-100 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 border-t border-gray-200 dark:border-gray-800">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-3 gap-8">
-            <div>
-              <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">TravlrHub</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Connecting travelers worldwide through shared experiences and adventures.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Quick Links</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/" className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/explore" className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
-                    Explore
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/auth/login" className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
-                    Login
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/auth/signup" className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
-                    Sign Up
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Contact</h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-2">
-                Have questions or suggestions? Reach out to us at support@travlrhub.com
-              </p>
-            </div>
+            <AnimatedElement animation="fadeIn" delay={0.1}>
+              <div>
+                <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white flex items-center">
+                  <FaGlobeAmericas className="mr-2 text-indigo-600 dark:text-indigo-400" /> TravlrHub
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300">
+                  Connecting travelers worldwide through shared experiences and adventures.
+                </p>
+              </div>
+            </AnimatedElement>
+
+            <AnimatedElement animation="fadeIn" delay={0.2}>
+              <div>
+                <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Quick Links</h3>
+                <ul className="space-y-2">
+                  <li>
+                    <Link href="/" className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                      Home
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/explore" className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                      Explore
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/auth/login" className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                      Login
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/auth/signup" className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                      Sign Up
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+            </AnimatedElement>
+
+            <AnimatedElement animation="fadeIn" delay={0.3}>
+              <div>
+                <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Contact</h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-2">
+                  Have questions or suggestions? Reach out to us at support@travlrhub.com
+                </p>
+              </div>
+            </AnimatedElement>
           </div>
           <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800 text-center text-gray-500 dark:text-gray-400">
             <p>© {new Date().getFullYear()} TravlrHub. All rights reserved.</p>

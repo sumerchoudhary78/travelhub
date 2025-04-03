@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./lib/AuthContext";
 import Navbar from "./components/Navbar";
+import ClientBackground from "./components/ClientBackground";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,6 +26,10 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
+          {/* Three.js animated background - dynamically loaded */}
+          <ClientBackground />
+
+          {/* Main content */}
           <Navbar />
           <main className="pt-16 min-h-screen">
             {children}

@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '../lib/AuthContext';
 import { usePathname } from 'next/navigation';
-import { FaHome, FaCompass, FaUser, FaComments, FaSignOutAlt, FaSignInAlt, FaRoute, FaUserFriends } from 'react-icons/fa';
+import { FaHome, FaCompass, FaUser, FaComments, FaSignOutAlt, FaSignInAlt, FaRoute, FaUserFriends, FaGlobeAmericas } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navbar() {
   const { currentUser, logout } = useAuth();
@@ -27,6 +28,11 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [pathname]);
+
   // Handle logout
   const handleLogout = async () => {
     try {
@@ -41,104 +47,101 @@ export default function Navbar() {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  // Animation variants - memoized to prevent recreation on each render
+  const navbarVariants = useMemo(() => ({
+    hidden: { opacity: 0, y: -20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
+  }), []);
+
+  const mobileMenuVariants = useMemo(() => ({
+    hidden: { opacity: 0, height: 0, overflow: 'hidden' },
+    visible: {
+      opacity: 1,
+      height: 'auto',
+      transition: {
+        duration: 0.3,
+        staggerChildren: 0.05,
+        when: 'beforeChildren'
+      }
+    },
+    exit: {
+      opacity: 0,
+      height: 0,
+      transition: {
+        duration: 0.2,
+        when: 'afterChildren',
+        staggerChildren: 0.05,
+        staggerDirection: -1
+      }
+    }
+  }), []);
+
+  const menuItemVariants = useMemo(() => ({
+    hidden: { opacity: 0, x: -20 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.2 } },
+    exit: { opacity: 0, x: -20, transition: { duration: 0.2 } }
+  }), []);
+
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      isScrolled ? 'bg-white/90 dark:bg-black/90 shadow-md backdrop-blur-sm' : 'bg-transparent'
-    }`}>
+    <motion.nav
+      initial="hidden"
+      animate="visible"
+      variants={navbarVariants}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled ? 'glass shadow-lg' : 'bg-transparent'
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo and brand */}
           <div className="flex items-center">
-            <Link href="/" className="flex items-center">
-              <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">TravlrHub</span>
+            <Link href="/" className="flex items-center group">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex items-center"
+              >
+                <FaGlobeAmericas className="h-6 w-6 text-indigo-600 dark:text-indigo-400 mr-2 group-hover:animate-spin-slow" />
+                <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">TravlrHub</span>
+              </motion.div>
             </Link>
           </div>
 
           {/* Desktop navigation */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link href="/" className={`px-3 py-2 rounded-md text-sm font-medium ${
-              pathname === '/' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'
-            }`}>
-              <div className="flex items-center gap-2">
-                <FaHome />
-                <span>Home</span>
-              </div>
-            </Link>
-
-            <Link href="/explore" className={`px-3 py-2 rounded-md text-sm font-medium ${
-              pathname === '/explore' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'
-            }`}>
-              <div className="flex items-center gap-2">
-                <FaCompass />
-                <span>Explore</span>
-              </div>
-            </Link>
+            <NavLink href="/" icon={<FaHome />} label="Home" isActive={pathname === '/'} />
+            <NavLink href="/explore" icon={<FaCompass />} label="Explore" isActive={pathname === '/explore'} />
 
             {currentUser && (
               <>
-                <Link href="/chat" className={`px-3 py-2 rounded-md text-sm font-medium ${
-                  pathname === '/chat' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'
-                }`}>
-                  <div className="flex items-center gap-2">
-                    <FaComments />
-                    <span>Chat</span>
-                  </div>
-                </Link>
+                <NavLink href="/chat" icon={<FaComments />} label="Chat" isActive={pathname === '/chat'} />
+                <NavLink href="/friends" icon={<FaUserFriends />} label="Friends" isActive={pathname.startsWith('/friends')} />
+                <NavLink href="/itineraries" icon={<FaRoute />} label="Itineraries" isActive={pathname.startsWith('/itineraries')} />
+                <NavLink href="/profile" icon={<FaUser />} label="Profile" isActive={pathname === '/profile'} />
 
-                <Link href="/friends" className={`px-3 py-2 rounded-md text-sm font-medium ${
-                  pathname.startsWith('/friends') ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'
-                }`}>
-                  <div className="flex items-center gap-2">
-                    <FaUserFriends />
-                    <span>Friends</span>
-                  </div>
-                </Link>
-
-                <Link href="/itineraries" className={`px-3 py-2 rounded-md text-sm font-medium ${
-                  pathname.startsWith('/itineraries') ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'
-                }`}>
-                  <div className="flex items-center gap-2">
-                    <FaRoute />
-                    <span>Itineraries</span>
-                  </div>
-                </Link>
-
-                <Link href="/profile" className={`px-3 py-2 rounded-md text-sm font-medium ${
-                  pathname === '/profile' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'
-                }`}>
-                  <div className="flex items-center gap-2">
-                    <FaUser />
-                    <span>Profile</span>
-                  </div>
-                </Link>
-
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={handleLogout}
-                  className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+                  className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                 >
                   <div className="flex items-center gap-2">
                     <FaSignOutAlt />
                     <span>Logout</span>
                   </div>
-                </button>
+                </motion.button>
               </>
             )}
 
             {!currentUser && (
-              <Link href="/auth/login" className={`px-3 py-2 rounded-md text-sm font-medium ${
-                pathname === '/auth/login' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'
-              }`}>
-                <div className="flex items-center gap-2">
-                  <FaSignInAlt />
-                  <span>Login</span>
-                </div>
-              </Link>
+              <NavLink href="/auth/login" icon={<FaSignInAlt />} label="Login" isActive={pathname === '/auth/login'} />
             )}
           </div>
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center">
-            <button
+            <motion.button
+              whileTap={{ scale: 0.9 }}
               onClick={toggleMenu}
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 focus:outline-none"
             >
@@ -160,94 +163,86 @@ export default function Navbar() {
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
-            </button>
+            </motion.button>
           </div>
         </div>
       </div>
 
-      {/* Mobile menu */}
-      <div className={`${isMenuOpen ? 'block' : 'hidden'} md:hidden bg-white dark:bg-gray-900 shadow-lg`}>
-        <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-          <Link href="/" className={`block px-3 py-2 rounded-md text-base font-medium ${
-            pathname === '/' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'
-          }`}>
-            <div className="flex items-center gap-2">
-              <FaHome />
-              <span>Home</span>
+      {/* Mobile menu with animation */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            variants={mobileMenuVariants}
+            className="md:hidden glass shadow-lg overflow-hidden"
+          >
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+              <MobileNavLink href="/" icon={<FaHome />} label="Home" isActive={pathname === '/'} variants={menuItemVariants} />
+              <MobileNavLink href="/explore" icon={<FaCompass />} label="Explore" isActive={pathname === '/explore'} variants={menuItemVariants} />
+
+              {currentUser && (
+                <>
+                  <MobileNavLink href="/chat" icon={<FaComments />} label="Chat" isActive={pathname === '/chat'} variants={menuItemVariants} />
+                  <MobileNavLink href="/friends" icon={<FaUserFriends />} label="Friends" isActive={pathname.startsWith('/friends')} variants={menuItemVariants} />
+                  <MobileNavLink href="/itineraries" icon={<FaRoute />} label="Itineraries" isActive={pathname.startsWith('/itineraries')} variants={menuItemVariants} />
+                  <MobileNavLink href="/profile" icon={<FaUser />} label="Profile" isActive={pathname === '/profile'} variants={menuItemVariants} />
+
+                  <motion.button
+                    variants={menuItemVariants}
+                    onClick={handleLogout}
+                    className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <FaSignOutAlt />
+                      <span>Logout</span>
+                    </div>
+                  </motion.button>
+                </>
+              )}
+
+              {!currentUser && (
+                <MobileNavLink href="/auth/login" icon={<FaSignInAlt />} label="Login" isActive={pathname === '/auth/login'} variants={menuItemVariants} />
+              )}
             </div>
-          </Link>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.nav>
+  );
+}
 
-          <Link href="/explore" className={`block px-3 py-2 rounded-md text-base font-medium ${
-            pathname === '/explore' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'
-          }`}>
-            <div className="flex items-center gap-2">
-              <FaCompass />
-              <span>Explore</span>
-            </div>
-          </Link>
+// Desktop navigation link component
+function NavLink({ href, icon, label, isActive }) {
+  return (
+    <Link href={href} className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+      isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'
+    }`}>
+      <motion.div
+        className="flex items-center gap-2"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        {icon}
+        <span>{label}</span>
+      </motion.div>
+    </Link>
+  );
+}
 
-          {currentUser && (
-            <>
-              <Link href="/chat" className={`block px-3 py-2 rounded-md text-base font-medium ${
-                pathname === '/chat' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'
-              }`}>
-                <div className="flex items-center gap-2">
-                  <FaComments />
-                  <span>Chat</span>
-                </div>
-              </Link>
-
-              <Link href="/friends" className={`block px-3 py-2 rounded-md text-base font-medium ${
-                pathname.startsWith('/friends') ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'
-              }`}>
-                <div className="flex items-center gap-2">
-                  <FaUserFriends />
-                  <span>Friends</span>
-                </div>
-              </Link>
-
-              <Link href="/itineraries" className={`block px-3 py-2 rounded-md text-base font-medium ${
-                pathname.startsWith('/itineraries') ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'
-              }`}>
-                <div className="flex items-center gap-2">
-                  <FaRoute />
-                  <span>Itineraries</span>
-                </div>
-              </Link>
-
-              <Link href="/profile" className={`block px-3 py-2 rounded-md text-base font-medium ${
-                pathname === '/profile' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'
-              }`}>
-                <div className="flex items-center gap-2">
-                  <FaUser />
-                  <span>Profile</span>
-                </div>
-              </Link>
-
-              <button
-                onClick={handleLogout}
-                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
-              >
-                <div className="flex items-center gap-2">
-                  <FaSignOutAlt />
-                  <span>Logout</span>
-                </div>
-              </button>
-            </>
-          )}
-
-          {!currentUser && (
-            <Link href="/auth/login" className={`block px-3 py-2 rounded-md text-base font-medium ${
-              pathname === '/auth/login' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'
-            }`}>
-              <div className="flex items-center gap-2">
-                <FaSignInAlt />
-                <span>Login</span>
-              </div>
-            </Link>
-          )}
+// Mobile navigation link component
+function MobileNavLink({ href, icon, label, isActive, variants }) {
+  return (
+    <motion.div variants={variants}>
+      <Link href={href} className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+        isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'
+      }`}>
+        <div className="flex items-center gap-2">
+          {icon}
+          <span>{label}</span>
         </div>
-      </div>
-    </nav>
+      </Link>
+    </motion.div>
   );
 }

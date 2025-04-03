@@ -8,6 +8,7 @@ import { FaUser, FaPaperPlane, FaCircle, FaRobot } from 'react-icons/fa';
 import TravelAssistant from './TravelAssistant';
 import { extractTravelQuery } from '../utils/geminiAI';
 import { trackMessageSent, trackUniqueChat, trackChatInitiated, trackTravelerQuery } from '../utils/badgeUtils';
+import { FaComments } from "react-icons/fa";
 
 export default function PrivateChat({ currentUser, selectedUser, chatId }) {
   const [messages, setMessages] = useState([]);

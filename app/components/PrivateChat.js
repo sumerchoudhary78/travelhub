@@ -196,30 +196,38 @@ export default function PrivateChat({ currentUser, selectedUser, chatId }) {
   return (
     <div className="flex flex-col h-[600px]">
       {/* Chat header */}
-      <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center">
+      <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex items-center sticky top-0 z-10 shadow-sm">
         <div className="flex-shrink-0 relative">
           {chatPartner.photoURL ? (
-            <Image
-              src={chatPartner.photoURL}
-              alt={chatPartner.displayName || 'User'}
-              width={40}
-              height={40}
-              className="rounded-full"
-            />
-          ) : (
-            <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-              <FaUser className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+            <div className="relative">
+              <Image
+                src={chatPartner.photoURL}
+                alt={chatPartner.displayName || 'User'}
+                width={40}
+                height={40}
+                className="rounded-full border-2 border-white dark:border-gray-800 shadow-sm"
+              />
+              {chatPartner.online && (
+                <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white dark:border-gray-800 shadow-sm"></div>
+              )}
             </div>
-          )}
-          {chatPartner.online && (
-            <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white dark:border-gray-800"></div>
+          ) : (
+            <div className="relative">
+              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center shadow-sm border-2 border-white dark:border-gray-800">
+                <FaUser className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+              </div>
+              {chatPartner.online && (
+                <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white dark:border-gray-800 shadow-sm"></div>
+              )}
+            </div>
           )}
         </div>
         <div className="ml-3">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
             {chatPartner.displayName || 'Anonymous'}
           </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-600 dark:text-gray-300 flex items-center">
+            <span className={`inline-block h-2 w-2 rounded-full mr-2 ${chatPartner.online ? 'bg-green-500' : 'bg-gray-400'}`}></span>
             {chatPartner.lastActive ? (
               `Last active: ${new Date(chatPartner.lastActive).toLocaleDateString()}`
             ) : (
@@ -230,10 +238,13 @@ export default function PrivateChat({ currentUser, selectedUser, chatId }) {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-5 bg-gray-50 dark:bg-gray-900">
         {loading ? (
           <div className="flex items-center justify-center h-full">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+            <div className="flex flex-col items-center">
+              <div className="animate-spin rounded-full h-10 w-10 border-4 border-indigo-500 border-t-transparent"></div>
+              <p className="mt-3 text-gray-600 dark:text-gray-400">Loading messages...</p>
+            </div>
           </div>
         ) : messages.length > 0 ? (
           messages.map((message) => {
@@ -244,44 +255,46 @@ export default function PrivateChat({ currentUser, selectedUser, chatId }) {
                 key={message.id}
                 className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
               >
-                <div className={`flex max-w-xs md:max-w-md ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'}`}>
+                <div className={`flex max-w-xs md:max-w-md ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'} items-end`}>
                   {!isCurrentUser && (
-                    <div className={`flex-shrink-0 mr-3`}>
+                    <div className={`flex-shrink-0 mr-3 mb-1`}>
                       {message.senderPhotoURL ? (
-                        <Image
-                          src={message.senderPhotoURL}
-                          alt={message.senderName || 'User'}
-                          width={36}
-                          height={36}
-                          className="rounded-full"
-                        />
+                        <div className="relative">
+                          <Image
+                            src={message.senderPhotoURL}
+                            alt={message.senderName || 'User'}
+                            width={36}
+                            height={36}
+                            className="rounded-full border-2 border-white dark:border-gray-800 shadow-sm"
+                          />
+                        </div>
                       ) : (
-                        <div className="h-9 w-9 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                          <FaUser className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                        <div className="h-9 w-9 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center shadow-sm border-2 border-white dark:border-gray-800">
+                          <FaUser className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                         </div>
                       )}
                     </div>
                   )}
-                  <div>
+                  <div className="max-w-full">
                     {message.timestamp && (
                       <p className={`text-xs ${isCurrentUser ? 'text-right' : 'text-left'} text-gray-400 dark:text-gray-500 mb-1`}>
                         {formatTimestamp(message.timestamp)}
                       </p>
                     )}
                     <div
-                      className={`rounded-lg px-4 py-2 ${
+                      className={`rounded-2xl px-4 py-2.5 shadow-sm ${
                         isCurrentUser
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                          ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white'
+                          : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700'
                       }`}
                     >
-                      <p className="text-sm">{message.text}</p>
-                      {travelQueries[message.id] && (
-                        <div className="mt-2">
-                          <TravelAssistant query={travelQueries[message.id]} />
-                        </div>
-                      )}
+                      <p className="text-sm whitespace-pre-wrap break-words">{message.text}</p>
                     </div>
+                    {travelQueries[message.id] && (
+                      <div className="mt-2 ml-2">
+                        <TravelAssistant query={travelQueries[message.id]} />
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -289,36 +302,44 @@ export default function PrivateChat({ currentUser, selectedUser, chatId }) {
           })
         ) : (
           <div className="flex items-center justify-center h-full">
-            <p className="text-gray-500 dark:text-gray-400">No messages yet. Start the conversation!</p>
+            <div className="text-center bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+              <FaComments className="h-12 w-12 text-indigo-500 dark:text-indigo-400 mx-auto mb-3" />
+              <p className="text-gray-700 dark:text-gray-300 font-medium mb-2">No messages yet</p>
+              <p className="text-gray-500 dark:text-gray-400 text-sm">Start the conversation!</p>
+            </div>
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
 
       {/* Message input */}
-      <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
-        <form onSubmit={handleSendMessage} className="flex">
-          <input
-            type="text"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Type a message... (Use @traveler to get travel info)"
-            className="flex-1 rounded-l-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-indigo-500 focus:border-indigo-500"
-          />
-          {newMessage.includes('@traveler') && (
-            <div className="absolute bottom-14 left-0 right-0 bg-blue-50 dark:bg-blue-900/20 p-2 rounded-t-lg border border-blue-200 dark:border-blue-800 mx-4">
-              <div className="flex items-center text-xs text-blue-700 dark:text-blue-300">
-                <FaRobot className="mr-1" />
-                <span>Travel Assistant will respond when you send this message</span>
+      <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-md">
+        {newMessage.includes('@traveler') && (
+          <div className="mb-2 bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="flex items-center text-xs text-blue-700 dark:text-blue-300">
+              <div className="flex-shrink-0 bg-blue-100 dark:bg-blue-800/50 p-1 rounded-full mr-2">
+                <FaRobot className="h-3 w-3 text-blue-600 dark:text-blue-400" />
               </div>
+              <span>Travel Assistant will respond when you send this message</span>
             </div>
-          )}
+          </div>
+        )}
+        <form onSubmit={handleSendMessage} className="flex items-center">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Type a message... (Use @traveler to get travel info)"
+              className="w-full rounded-l-full border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-indigo-500 focus:border-indigo-500 pl-4 pr-4 py-3 shadow-inner"
+            />
+          </div>
           <button
             type="submit"
             disabled={!newMessage.trim()}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-r-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white p-3 rounded-r-full disabled:opacity-50 disabled:cursor-not-allowed shadow-md transition-all duration-200 ease-in-out"
           >
-            <FaPaperPlane />
+            <FaPaperPlane className="h-5 w-5" />
           </button>
         </form>
       </div>

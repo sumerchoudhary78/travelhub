@@ -20,23 +20,41 @@ export async function getTravelInfo(query) {
       };
     }
 
-    // Create a more specific prompt for travel information
+    // Create a more specific prompt for travel information with structured format
     const enhancedPrompt = `As a travel assistant, please provide helpful information about ${query}.
-    Include details about:
-    - Popular attractions
-    - Local cuisine
-    - Best time to visit
-    - Travel tips
 
-    Keep your response concise and informative, focusing on practical advice for travelers.`;
-  
-    
+    Format your response with these exact section headings followed by a colon:
+
+    DESTINATION OVERVIEW:
+    [Brief 1-2 sentence introduction about the destination]
+
+    POPULAR ATTRACTIONS:
+    - [Attraction 1 with brief description]
+    - [Attraction 2 with brief description]
+    - [Attraction 3 with brief description]
+
+    LOCAL CUISINE:
+    - [Dish/Food 1 with brief description]
+    - [Dish/Food 2 with brief description]
+    - [Dish/Food 3 with brief description]
+
+    BEST TIME TO VISIT:
+    [Information about seasons, weather, and optimal visiting periods]
+
+    TRAVEL TIPS:
+    - [Practical tip 1]
+    - [Practical tip 2]
+    - [Practical tip 3]
+
+    Keep each section concise and informative, focusing on practical advice for travelers.`;
+
+
     // Get the generative model - using the correct model name
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
     // Generate content
     const result = await model.generateContent(enhancedPrompt);
-    const response = await result.response;
+    const response = result.response;
     const text = response.text();
 
     return {

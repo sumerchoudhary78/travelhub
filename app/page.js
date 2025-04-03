@@ -23,18 +23,18 @@ function FeatureCard({ icon, title, description, delay }) {
   return (
     <AnimatedElement animation="slideUp" delay={delay} className="h-full">
       <motion.div
-        className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow-sm card-hover h-full glass"
+        className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md card-hover h-full border border-gray-200 dark:border-gray-700"
         whileHover={{ y: -5 }}
       >
         <motion.div
-          className="text-indigo-600 dark:text-indigo-400 mb-4"
+          className="text-primary dark:text-primary-light mb-4 bg-primary-light/10 dark:bg-primary-light/5 p-3 rounded-full inline-block"
           whileHover={{ rotate: 5, scale: 1.1 }}
           transition={{ type: "spring", stiffness: 300 }}
         >
           {icon}
         </motion.div>
-        <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">{title}</h3>
-        <p className="text-gray-600 dark:text-gray-300">{description}</p>
+        <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">{title}</h3>
+        <p className="text-gray-700 dark:text-gray-300">{description}</p>
       </motion.div>
     </AnimatedElement>
   );
@@ -65,12 +65,12 @@ export default function Home() {
                 </p>
                 <div className="flex flex-wrap gap-4">
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Link href="/auth/signup" className="bg-white text-indigo-600 hover:bg-gray-100 px-6 py-3 rounded-md font-medium text-lg transition-colors btn-hover-effect inline-block">
+                    <Link href="/auth/signup" className="btn btn-primary px-6 py-3 text-lg btn-hover-effect">
                       Join Now
                     </Link>
                   </motion.div>
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Link href="/explore" className="bg-transparent border-2 border-white hover:bg-white/10 px-6 py-3 rounded-md font-medium text-lg transition-colors btn-hover-effect inline-block">
+                    <Link href="/explore" className="btn bg-transparent border-2 border-white hover:bg-white/10 text-white px-6 py-3 text-lg btn-hover-effect">
                       Explore
                     </Link>
                   </motion.div>
@@ -90,7 +90,7 @@ export default function Home() {
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto">
           <AnimatedElement>
-            <h2 className="text-3xl font-bold text-center mb-12 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent dark:text-white inline-block">
+            <h2 className="text-3xl font-bold text-center mb-12 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent inline-block">
               Discover the TravlrHub Experience
             </h2>
           </AnimatedElement>
@@ -131,7 +131,7 @@ export default function Home() {
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-800">
         <div className="max-w-7xl mx-auto">
           <AnimatedElement>
-            <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">
+            <h2 className="text-3xl font-bold text-center mb-12 bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent inline-block">
               More Amazing Features
             </h2>
           </AnimatedElement>
@@ -182,7 +182,7 @@ export default function Home() {
             whileTap={{ scale: 0.95 }}
             className="inline-block"
           >
-            <Link href="/auth/signup" className="bg-white text-indigo-600 hover:bg-gray-100 px-8 py-4 rounded-md font-medium text-lg transition-colors btn-hover-effect inline-block animate-glow">
+            <Link href="/auth/signup" className="btn btn-primary px-8 py-4 text-lg btn-hover-effect inline-block animate-glow">
               Create Your Account
             </Link>
           </motion.div>

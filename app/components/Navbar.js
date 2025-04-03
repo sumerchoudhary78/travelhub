@@ -88,7 +88,7 @@ export default function Navbar() {
       animate="visible"
       variants={navbarVariants}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'glass shadow-lg' : 'bg-transparent'
+        isScrolled ? 'bg-white dark:bg-gray-900 shadow-lg' : 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-md'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -176,9 +176,9 @@ export default function Navbar() {
             animate="visible"
             exit="exit"
             variants={mobileMenuVariants}
-            className="md:hidden glass shadow-lg overflow-hidden"
+            className="md:hidden bg-white dark:bg-gray-800 shadow-lg overflow-hidden border-t border-gray-200 dark:border-gray-700"
           >
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <div className="px-4 pt-3 pb-4 space-y-2 sm:px-5">
               <MobileNavLink href="/" icon={<FaHome />} label="Home" isActive={pathname === '/'} variants={menuItemVariants} />
               <MobileNavLink href="/explore" icon={<FaCompass />} label="Explore" isActive={pathname === '/explore'} variants={menuItemVariants} />
 
@@ -192,7 +192,7 @@ export default function Navbar() {
                   <motion.button
                     variants={menuItemVariants}
                     onClick={handleLogout}
-                    className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                    className="block w-full text-left px-4 py-3 rounded-lg text-base font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                   >
                     <div className="flex items-center gap-2">
                       <FaSignOutAlt />
@@ -217,7 +217,9 @@ export default function Navbar() {
 function NavLink({ href, icon, label, isActive }) {
   return (
     <Link href={href} className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-      isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'
+      isActive
+        ? 'text-indigo-700 dark:text-indigo-300 font-semibold'
+        : 'text-gray-800 dark:text-gray-100 hover:text-indigo-600 dark:hover:text-indigo-300'
     }`}>
       <motion.div
         className="flex items-center gap-2"
@@ -235,8 +237,10 @@ function NavLink({ href, icon, label, isActive }) {
 function MobileNavLink({ href, icon, label, isActive, variants }) {
   return (
     <motion.div variants={variants}>
-      <Link href={href} className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-        isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'
+      <Link href={href} className={`block px-4 py-3 rounded-lg text-base font-medium transition-colors ${
+        isActive
+          ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+          : 'text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/30'
       }`}>
         <div className="flex items-center gap-2">
           {icon}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect,useCallback } from 'react';
 import { useAuth } from '../lib/AuthContext';
 import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -56,7 +56,7 @@ export default function AchievementPopup() {
   }, [achievements, showPopup]);
 
   // Handle closing the popup
-  const handleClose = () => {
+  const handleClose = useCallback() => {
     setShowPopup(false);
     setCurrentAchievement(null);
 
@@ -75,7 +75,8 @@ export default function AchievementPopup() {
 
       return () => clearTimeout(timer);
     }
-  }, [showPopup, handleClose, achievements, currentUser]);
+  },
+            [showPopup, handleClose, achievements, currentUser]);
 
   if (!showPopup || !currentAchievement) {
     return null;

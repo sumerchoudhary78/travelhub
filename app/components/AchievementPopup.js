@@ -75,8 +75,7 @@ export default function AchievementPopup() {
 
       return () => clearTimeout(timer);
     }
-  },
-            [showPopup, handleClose, achievements, currentUser]);
+  },[showPopup, handleClose, achievements, currentUser]);
 
   if (!showPopup || !currentAchievement) {
     return null;

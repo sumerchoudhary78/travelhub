@@ -80,7 +80,7 @@ export default function GlobalChat({ currentUser }) {
     };
 
     fetchUserData();
-  }, [messages]);
+  }, [messages, userCache]);
 
   // Check for travel queries in messages
   useEffect(() => {

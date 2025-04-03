@@ -117,7 +117,7 @@ export default function Badges() {
                               ></div>
                             </div>
                             <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {value}/{nextBadge.requirement} to earn "{nextBadge.name}"
+                              {value}/{nextBadge.requirement} to earn &quot;{nextBadge.name}&quot;
                             </p>
                           </div>
                         ) : (

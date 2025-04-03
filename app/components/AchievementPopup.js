@@ -12,13 +12,13 @@ export default function AchievementPopup() {
   const [achievements, setAchievements] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
   const [currentAchievement, setCurrentAchievement] = useState(null);
-  
+
   // Listen for new achievements
   useEffect(() => {
     if (!currentUser) return;
-    
+
     const userRef = doc(db, 'users', currentUser.uid);
-    
+
     const unsubscribe = onSnapshot(userRef, (docSnap) => {
       if (docSnap.exists()) {
         const userData = docSnap.data();
@@ -27,60 +27,60 @@ export default function AchievementPopup() {
         }
       }
     });
-    
+
     return () => unsubscribe();
   }, [currentUser]);
-  
+
   // Show achievements one by one
   useEffect(() => {
     if (achievements.length > 0 && !showPopup) {
       // Get the first achievement
       const achievement = achievements[0];
-      
+
       // Find the badge details
-      const badgeKey = Object.keys(BADGES).find(key => 
+      const badgeKey = Object.keys(BADGES).find(key =>
         BADGES[key].id === achievement.badgeId
       );
-      
+
       if (badgeKey) {
         setCurrentAchievement({
           ...achievement,
           ...BADGES[badgeKey]
         });
         setShowPopup(true);
-        
+
         // Remove this achievement from the queue
         setAchievements(prev => prev.slice(1));
       }
     }
   }, [achievements, showPopup]);
-  
+
+  // Handle closing the popup
+  const handleClose = () => {
+    setShowPopup(false);
+    setCurrentAchievement(null);
+
+    // If no more achievements, clear them from Firestore
+    if (achievements.length === 0 && currentUser) {
+      clearRecentAchievements(currentUser.uid);
+    }
+  };
+
   // Close popup after a delay
   useEffect(() => {
     if (showPopup) {
       const timer = setTimeout(() => {
         handleClose();
       }, 5000); // Auto-close after 5 seconds
-      
+
       return () => clearTimeout(timer);
     }
-  }, [showPopup]);
-  
-  // Handle closing the popup
-  const handleClose = () => {
-    setShowPopup(false);
-    setCurrentAchievement(null);
-    
-    // If no more achievements, clear them from Firestore
-    if (achievements.length === 0 && currentUser) {
-      clearRecentAchievements(currentUser.uid);
-    }
-  };
-  
+  }, [showPopup, handleClose, achievements, currentUser]);
+
   if (!showPopup || !currentAchievement) {
     return null;
   }
-  
+
   // Map badge colors to Tailwind classes
   const getColorClass = () => {
     switch (currentAchievement.color) {
@@ -108,7 +108,7 @@ export default function AchievementPopup() {
         return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
     }
   };
-  
+
   return (
     <div className="fixed bottom-4 right-4 z-50 max-w-sm w-full animate-slide-up">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
@@ -118,14 +118,14 @@ export default function AchievementPopup() {
               <FaTrophy className="text-yellow-500 mr-2" />
               New Achievement!
             </h3>
-            <button 
+            <button
               onClick={handleClose}
               className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
             >
               <FaTimes />
             </button>
           </div>
-          
+
           <div className="flex items-center mb-3">
             <div className={`h-12 w-12 rounded-full ${getColorClass()} flex items-center justify-center mr-3`}>
               <FaTrophy />
@@ -139,7 +139,7 @@ export default function AchievementPopup() {
               </p>
             </div>
           </div>
-          
+
           <div className="text-center">
             <button
               onClick={handleClose}

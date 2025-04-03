@@ -75,7 +75,7 @@ export default function UserSearch({ currentUserId, onFriendshipChange = null })
 
       {!loading && debouncedSearchTerm && searchResults.length === 0 && (
         <div className="text-center py-4">
-          <p className="text-gray-600 dark:text-gray-400">No users found matching "{debouncedSearchTerm}"</p>
+          <p className="text-gray-600 dark:text-gray-400">No users found matching &quot;{debouncedSearchTerm}&quot;</p>
         </div>
       )}
 

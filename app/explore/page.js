@@ -195,7 +195,7 @@ export default function ExplorePage() {
 
     loadPlaceDetails();
     // Dependency: selectedPlace.place_id ensures it runs when the ID changes.
-  }, [selectedPlace?.place_id]);
+  }, [selectedPlace?.place_id, selectedPlace]);
 
   // Combined loading state for initial view
   const initialLoading = locationLoading || loadingPlaces || (loadingTravelers && nearbyTravelers.length === 0);

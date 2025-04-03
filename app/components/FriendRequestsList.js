@@ -10,26 +10,26 @@ export default function FriendRequestsList({ requests, onRequestAction = null })
 
   const handleAccept = async (request) => {
     if (actionStates[request.friendshipId]) return;
-    
+
     setActionStates(prev => ({
       ...prev,
       [request.friendshipId]: 'accepting'
     }));
-    
+
     try {
       await acceptFriendRequest(request.friendshipId);
-      
+
       if (onRequestAction) {
         onRequestAction('accepted', request);
       }
-      
+
       setActionStates(prev => ({
         ...prev,
         [request.friendshipId]: 'accepted'
       }));
     } catch (error) {
       console.error('Error accepting friend request:', error);
-      
+
       setActionStates(prev => ({
         ...prev,
         [request.friendshipId]: null
@@ -39,26 +39,26 @@ export default function FriendRequestsList({ requests, onRequestAction = null })
 
   const handleReject = async (request) => {
     if (actionStates[request.friendshipId]) return;
-    
+
     setActionStates(prev => ({
       ...prev,
       [request.friendshipId]: 'rejecting'
     }));
-    
+
     try {
       await rejectFriendRequest(request.friendshipId);
-      
+
       if (onRequestAction) {
         onRequestAction('rejected', request);
       }
-      
+
       setActionStates(prev => ({
         ...prev,
         [request.friendshipId]: 'rejected'
       }));
     } catch (error) {
       console.error('Error rejecting friend request:', error);
-      
+
       setActionStates(prev => ({
         ...prev,
         [request.friendshipId]: null
@@ -72,7 +72,7 @@ export default function FriendRequestsList({ requests, onRequestAction = null })
         <FaUser className="mx-auto h-12 w-12 text-gray-400" />
         <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No pending requests</h3>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          You don't have any pending friend requests.
+          You don&apos;t have any pending friend requests.
         </p>
       </div>
     );
@@ -82,12 +82,12 @@ export default function FriendRequestsList({ requests, onRequestAction = null })
     <div className="space-y-4">
       {requests.map((request) => {
         const actionState = actionStates[request.friendshipId];
-        
+
         // Skip if already handled
         if (actionState === 'accepted' || actionState === 'rejected') {
           return null;
         }
-        
+
         return (
           <div key={request.friendshipId} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
             <div className="flex items-center space-x-4">
@@ -113,8 +113,8 @@ export default function FriendRequestsList({ requests, onRequestAction = null })
                 <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mt-1">
                   <FaClock className="flex-shrink-0 mr-1 h-3 w-3" />
                   <span>
-                    {request.createdAt 
-                      ? `Requested ${formatLastActive(request.createdAt)}` 
+                    {request.createdAt
+                      ? `Requested ${formatLastActive(request.createdAt)}`
                       : 'Request pending'}
                   </span>
                 </div>
